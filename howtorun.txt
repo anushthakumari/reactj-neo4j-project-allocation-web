@@ -1,0 +1,7 @@
+install dependencies: run below command
+npm install
+
+start the app: run below command
+npm start
+
+Note: run above command in root of your project.
