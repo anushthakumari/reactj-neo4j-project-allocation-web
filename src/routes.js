@@ -1,16 +1,13 @@
 import { createBrowserRouter } from "react-router-dom";
 
 //user
-// import Register from "./pages/Register";
 import Login from "./pages/Login";
 import UserHome from "./pages/Home";
 
 //supervisior
-import SupLogin from "./pages/supervisor/Login";
 import SupHome from "./pages/supervisor/Home";
 
 //Admin
-import AdminLogin from "./pages/admin/Login";
 import AdminHome from "./pages/admin/Home";
 
 export const authRouter = createBrowserRouter([
@@ -21,18 +18,6 @@ export const authRouter = createBrowserRouter([
 	{
 		path: "/login",
 		element: <Login />,
-	},
-	// {
-	// 	path: "/register",
-	// 	element: <Register />,
-	// },
-	{
-		path: "/sup-login",
-		element: <SupLogin />,
-	},
-	{
-		path: "/admin-login",
-		element: <AdminLogin />,
 	},
 ]);
 

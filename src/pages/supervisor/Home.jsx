@@ -1,7 +1,9 @@
 import React from "react";
 
+import Layout from "../../layouts/Layout";
+
 const Home = () => {
-	return <div>Super Visior Home</div>;
+	return <Layout>Super Visior Home</Layout>;
 };
 
 export default Home;

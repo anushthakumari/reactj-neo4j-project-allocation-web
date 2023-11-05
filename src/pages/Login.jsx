@@ -2,7 +2,7 @@ import React from "react";
 import { useLazyReadCypher } from "use-neo4j";
 import { Navigate } from "react-router-dom";
 
-import AuthLayout from "../layouts/AuthLayout";
+import Layout from "../layouts/Layout";
 
 import { useAuthState } from "../contexts/AuthProvider";
 
@@ -45,7 +45,7 @@ const Login = () => {
 	}
 
 	return (
-		<AuthLayout>
+		<Layout>
 			<div className="h-screen md:flex">
 				<div className="relative overflow-hidden md:flex w-1/2 bg-gradient-to-tr from-blue-800 to-purple-700 i justify-around items-center hidden">
 					<div>
@@ -125,7 +125,7 @@ const Login = () => {
 					</form>
 				</div>
 			</div>
-		</AuthLayout>
+		</Layout>
 	);
 };
 

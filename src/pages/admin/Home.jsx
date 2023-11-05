@@ -1,7 +1,9 @@
 import React from "react";
 
+import Layout from "../../layouts/Layout";
+
 const Home = () => {
-	return <div>Admin Home</div>;
+	return <Layout>Admin Home</Layout>;
 };
 
 export default Home;
