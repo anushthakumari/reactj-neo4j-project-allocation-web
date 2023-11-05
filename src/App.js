@@ -1,46 +1,29 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { useReadCypher } from "use-neo4j";
+import { RouterProvider } from "react-router-dom";
 
-import Register from "./pages/Register";
-import Login from "./pages/Login";
-import SupLogin from "./pages/supervisor/Login";
-import AdminLogin from "./pages/admin/Login";
-
-const router = createBrowserRouter([
-	{
-		path: "/",
-		element: <Login />,
-	},
-	{
-		path: "/login",
-		element: <Login />,
-	},
-	{
-		path: "/register",
-		element: <Register />,
-	},
-	{
-		path: "/sup-login",
-		element: <SupLogin />,
-	},
-	{
-		path: "/admin/login",
-		element: <AdminLogin />,
-	},
-]);
+import { userRouter, adminRouter, supRouter, authRouter } from "./routes";
+import useAuth from "./hooks/useAuth";
+import roles from "./constants/roles";
 
 function App() {
-	const { result } = useReadCypher("MATCH (e:Employee) RETURN e");
+	const user = useAuth();
 
-	const movies = result?.records?.map((row) => row.get("e").properties);
+	if (!user) {
+		return <RouterProvider router={authRouter} />;
+	}
 
-	console.log(movies);
+	if (user.role_id === roles.USER) {
+		return <RouterProvider router={userRouter} />;
+	}
 
-	return (
-		<div>
-			<RouterProvider router={router} />
-		</div>
-	);
+	if (user.role_id === roles.ADMIN) {
+		return <RouterProvider router={adminRouter} />;
+	}
+
+	if (user.role_id === roles.SUPERVISIOR) {
+		return <RouterProvider router={supRouter} />;
+	}
+
+	return <center>NO PAGE FOUND!!</center>;
 }
 
 export default App;

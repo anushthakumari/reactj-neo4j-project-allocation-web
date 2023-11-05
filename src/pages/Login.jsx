@@ -1,6 +1,47 @@
 import React from "react";
+import { useLazyReadCypher } from "use-neo4j";
 
-const Register = () => {
+import { useAuthState } from "../contexts/AuthProvider";
+import { Navigate } from "react-router-dom";
+
+const query = `MATCH (user:User {email: $email, password: $pass})-[:HAS_ROLE]->(role)
+RETURN user, COLLECT(role) AS roles
+`;
+
+const Login = () => {
+	const { saveUser } = useAuthState();
+	const [run, { loading, error, records, first }] = useLazyReadCypher(query);
+
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		const email = e.target.email.value.trim();
+		const pass = e.target.pass.value.trim();
+
+		run({ email, pass });
+	};
+
+	//successfully got user details
+	if (first) {
+		const role = first.get("roles")[0].properties;
+		const userDetails = first.get("user").properties;
+
+		delete userDetails.password;
+
+		saveUser({ ...userDetails, ...role, role_id: role.role_id.low });
+
+		return <Navigate to={"/"} />;
+	}
+
+	//No result found
+	if (records?.length === 0) {
+		alert("Invalid email or password!");
+	}
+
+	//an error occured!
+	if (error) {
+		alert("something went wrong!!");
+	}
+
 	return (
 		<div className="h-screen md:flex">
 			<div className="relative overflow-hidden md:flex w-1/2 bg-gradient-to-tr from-blue-800 to-purple-700 i justify-around items-center hidden">
@@ -21,7 +62,7 @@ const Register = () => {
 				<div className="absolute -top-20 -right-20 w-80 h-80 border-4 rounded-full border-opacity-30 border-t-8"></div>
 			</div>
 			<div className="flex md:w-1/2 justify-center py-10 items-center bg-white">
-				<form className="bg-white">
+				<form onSubmit={handleSubmit} className="bg-white">
 					<h1 className="text-gray-800 font-bold text-2xl mb-1">
 						Hello Again!
 					</h1>
@@ -43,10 +84,10 @@ const Register = () => {
 						</svg>
 						<input
 							className="pl-2 outline-none border-none"
-							type="text"
-							name=""
-							id=""
-							placeholder="Username"
+							type="email"
+							name="email"
+							id="email"
+							placeholder="email"
 						/>
 					</div>
 
@@ -64,24 +105,22 @@ const Register = () => {
 						</svg>
 						<input
 							className="pl-2 outline-none border-none"
-							type="text"
-							name=""
-							id=""
+							type="password"
+							name="pass"
+							id="pass"
 							placeholder="Password"
 						/>
 					</div>
 					<button
 						type="submit"
-						className="block w-full bg-indigo-600 mt-4 py-2 rounded-2xl text-white font-semibold mb-2">
-						Login
+						className="block w-full bg-indigo-600 mt-4 py-2 rounded-2xl text-white font-semibold mb-2"
+						disabled={loading}>
+						{loading ? "Loading..." : "Log In"}
 					</button>
-					<span className="text-sm ml-2 hover:text-blue-500 cursor-pointer">
-						Forgot Password ?
-					</span>
 				</form>
 			</div>
 		</div>
 	);
 };
 
-export default Register;
+export default Login;
