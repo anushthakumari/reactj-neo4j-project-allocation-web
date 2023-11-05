@@ -46,3 +46,26 @@ CREATE (user:User {
 MATCH (user:User {user_id: 'U125'})
 MATCH (role:Role {role_id: 3})
 CREATE (user)-[:HAS_ROLE]->(role)
+
+
+/// how to assign a project
+// Create a Project node with a creation_date property
+MERGE (project:Project {
+    project_id: 'P001',
+    title: 'Project Title',
+    description: 'Project Description',
+    asset_link: 'https://example.com',
+    creation_date: date('2023-11-06') // Date format: 'YYYY-MM-DD'
+})
+
+// Find the Supervisor by their user_id and role_id
+MATCH (supervisor:User {user_id: 'S123'})-[:HAS_ROLE]->(supervisor_role:Role {role_id: 2})
+
+// Find the Users to whom the project is to be assigned by their user_ids and role_ids (regular users)
+MATCH (user:User {user_id: 'U123'})-[:HAS_ROLE]->(user_role:Role {role_id: 1})
+MATCH (another_user:User {user_id: 'U456'})-[:HAS_ROLE]->(user_role)
+
+// Create relationships to the Project node
+MERGE (supervisor)-[:ASSIGNED_PROJECT]->(project)
+MERGE (user)-[:WORKS_ON]->(project)
+MERGE (another_user)-[:WORKS_ON]->(project)

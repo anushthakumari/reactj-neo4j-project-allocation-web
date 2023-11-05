@@ -1,0 +1,15 @@
+.input-group {
+    @apply w-full bg-gray-100 p-2 rounded-lg;
+}
+
+.input-group input {
+    @apply w-full bg-white rounded-lg p-2 focus:outline-none;
+}
+
+.suggestions-list {
+    @apply w-full mt-2 rounded-lg;
+}
+
+.suggestion-item {
+    @apply w-full p-2 cursor-pointer bg-white rounded-lg hover:bg-gray-200;
+}

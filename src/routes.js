@@ -5,7 +5,8 @@ import Login from "./pages/Login";
 import UserHome from "./pages/Home";
 
 //supervisior
-import SupHome from "./pages/supervisor/Home";
+import SupProjectList from "./pages/supervisor/ProjectList";
+import SupProjectDetails from "./pages/supervisor/ProjectDetails";
 
 //Admin
 import AdminHome from "./pages/admin/Home";
@@ -33,7 +34,11 @@ export const userRouter = createBrowserRouter([
 export const supRouter = createBrowserRouter([
 	{
 		path: "/",
-		element: <SupHome />,
+		element: <SupProjectList />,
+	},
+	{
+		path: "/project/:projectid",
+		element: <SupProjectDetails />,
 	},
 ]);
 
