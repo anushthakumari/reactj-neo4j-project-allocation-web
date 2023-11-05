@@ -7,7 +7,11 @@ import roles from "../constants/roles";
 const loginRoutes = [{ title: "Login", to: "/login" }];
 const userRoutes = [{ title: "Home", to: "/" }];
 const supRoutes = [{ title: "Home", to: "/" }];
-const adminRoutes = [{ title: "Home", to: "/" }];
+const adminRoutes = [
+	{ title: "Home", to: "/" },
+	{ title: "Candidates", to: "/candidates" },
+	{ title: "Supervisiors", to: "/sup-list" },
+];
 
 const Layout = ({ children }) => {
 	const [open, setopen] = useState(false);
@@ -149,7 +153,7 @@ const Layout = ({ children }) => {
 					</div> */}
 				</nav>
 			</div>
-			{children}
+			<div className="px-4">{children}</div>
 		</div>
 	);
 };

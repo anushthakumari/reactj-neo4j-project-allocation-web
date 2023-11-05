@@ -9,6 +9,8 @@ import SupHome from "./pages/supervisor/Home";
 
 //Admin
 import AdminHome from "./pages/admin/Home";
+import AdminUserList from "./pages/admin/UserList";
+import SupUserList from "./pages/admin/SupList";
 
 export const authRouter = createBrowserRouter([
 	{
@@ -39,5 +41,13 @@ export const adminRouter = createBrowserRouter([
 	{
 		path: "/",
 		element: <AdminHome />,
+	},
+	{
+		path: "/candidates",
+		element: <AdminUserList />,
+	},
+	{
+		path: "/sup-list",
+		element: <SupUserList />,
 	},
 ]);

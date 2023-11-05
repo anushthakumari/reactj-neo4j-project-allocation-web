@@ -13,6 +13,7 @@
     "react-router-dom": "^6.17.0",
     "react-scripts": "5.0.1",
     "sort-by": "^1.2.0",
+    "uid": "^2.0.2",
     "use-neo4j": "^0.3.13",
     "web-vitals": "^2.1.4"
   },
