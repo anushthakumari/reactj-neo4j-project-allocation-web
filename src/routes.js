@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 
 //user
-import Register from "./pages/Register";
+// import Register from "./pages/Register";
 import Login from "./pages/Login";
 import UserHome from "./pages/Home";
 
@@ -22,16 +22,16 @@ export const authRouter = createBrowserRouter([
 		path: "/login",
 		element: <Login />,
 	},
-	{
-		path: "/register",
-		element: <Register />,
-	},
+	// {
+	// 	path: "/register",
+	// 	element: <Register />,
+	// },
 	{
 		path: "/sup-login",
 		element: <SupLogin />,
 	},
 	{
-		path: "/admin/login",
+		path: "/admin-login",
 		element: <AdminLogin />,
 	},
 ]);
