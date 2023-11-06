@@ -85,8 +85,12 @@ const ProjectDetails = () => {
 							</div>
 						</div>
 						<ul class="space-y-4">
-							{assign_query_state.loading ? <li>Loading...</li> : ""}
-							{fetch_assign_users.loading ? <li>Loading...</li> : ""}
+							{assign_query_state.loading || fetch_assign_users.loading ? (
+								<li>Loading...</li>
+							) : (
+								""
+							)}
+							{!assigned_users.length ? <li>No Candidates Assigned!</li> : ""}
 
 							{assigned_users.map((v) => (
 								<li key={v.user_id} class="flex items-center space-x-4">
