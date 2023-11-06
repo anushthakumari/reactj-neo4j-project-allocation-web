@@ -5,6 +5,9 @@ import { useReadCypher, useLazyWriteCypher } from "use-neo4j";
 import Layout from "../../layouts/Layout";
 import UserSearch from "../../components/UserSearch";
 
+import useAuth from "../../hooks/useAuth";
+import roles from "../../constants/roles";
+
 const project_query = `MATCH (project:Project {project_id: $project_id})<-[:CREATED]-(user:User)
 RETURN project, user
 `;
@@ -19,6 +22,8 @@ RETURN user
 
 const ProjectDetails = () => {
 	const { projectid } = useParams();
+
+	const user = useAuth();
 
 	const { loading, error, first } = useReadCypher(project_query, {
 		project_id: projectid,
@@ -72,17 +77,33 @@ const ProjectDetails = () => {
 							{projectDetails.title}
 						</h1>
 						<p class="mb-4">{projectDetails.description}</p>
-						<p class="mb-4">Created By: {createdByDetails.full_name}</p>
+						<div className="flex items-center">
+							<p>Asset Link: </p>
+							<a
+								className="underline text-blue-500"
+								target="_blank"
+								rel="noreferrer"
+								href={projectDetails.asset_link}>
+								{projectDetails.asset_link}
+							</a>
+						</div>
+						<p class="mb-4">
+							Created By: <strong>{createdByDetails.full_name}</strong>
+						</p>
 					</div>
 
 					<div class="bg-white p-8 rounded shadow">
 						<div className="flex justify-between items-center">
 							<h2 class="text-2xl font-bold mb-4">Assigned Candidates</h2>
 
-							<div>
-								<p> Assign Candidates By Searching</p>
-								<UserSearch onSelect={handleSelect} />
-							</div>
+							{user.role_id === roles.SUPERVISIOR ? (
+								<div>
+									<p> Assign Candidates By Searching</p>
+									<UserSearch onSelect={handleSelect} />
+								</div>
+							) : (
+								""
+							)}
 						</div>
 						<ul class="space-y-4">
 							{assign_query_state.loading || fetch_assign_users.loading ? (
@@ -103,9 +124,6 @@ const ProjectDetails = () => {
 										<h3 class="text-md font-semibold capitalize">
 											{v.full_name}
 										</h3>
-										<a href="#" class="text-blue-500">
-											See Details
-										</a>
 									</div>
 								</li>
 							))}

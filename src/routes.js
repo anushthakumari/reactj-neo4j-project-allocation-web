@@ -29,6 +29,10 @@ export const userRouter = createBrowserRouter([
 		path: "/",
 		element: <UserHome />,
 	},
+	{
+		path: "/project/:projectid",
+		element: <SupProjectDetails />,
+	},
 ]);
 
 export const supRouter = createBrowserRouter([
@@ -54,5 +58,9 @@ export const adminRouter = createBrowserRouter([
 	{
 		path: "/sup-list",
 		element: <SupUserList />,
+	},
+	{
+		path: "/project/:projectid",
+		element: <SupProjectDetails />,
 	},
 ]);
