@@ -45,7 +45,7 @@ const CreateUserModal = ({
 
 		const full_name = formSate.full_name.trim();
 		const email = formSate.email.trim();
-		const pass = formSate.full_name.trim();
+		const pass = formSate.pass.trim();
 
 		if (!isEdit) {
 			const user_id = uid();
