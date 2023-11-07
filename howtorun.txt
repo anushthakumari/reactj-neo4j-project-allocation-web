@@ -1,7 +1,32 @@
+install nodejs if not installed by going to following url:
+https://nodejs.org/en/download
+
 install dependencies: run below command
 npm install
 
 start the app: run below command
 npm start
 
+
 Note: run above command in root of your project.
+
+
+===========================Plese Note following points===============================
+
+1) For every user, the login page is same. 
+2) In order to switch account you need to login with different credentials.
+3) If you want to test all the user working, open different windows for different user, this way you can test and see the changes immediately
+
+4) user login has one page, that shows list of project assigned to it.
+5) by clicking on, see details user can see project details.
+
+6) The supervsior home page shows list of projects the supervsior itself has created.
+7) By clicking on creat project the form will open, where supervsior can create a project.
+8) After creating project the supervsior can click on see details to see all the project details
+9) On the details page, supervsior can add candidates by searching user name and by clicking on user name supervsior can assign user to that project
+   A project can have multiple assigned users
+
+10) On Admin side, there are 3 pages
+    -Home (shows list of all projects, can see details of the project.)
+    -supervsior (shows list of supervsiors, and can create one.)
+    -candidates (shows list of candidates, and can create one.)
