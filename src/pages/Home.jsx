@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useReadCypher } from "use-neo4j";
 import { Link } from "react-router-dom";
 
@@ -6,8 +6,10 @@ import Layout from "../layouts/Layout";
 
 import useAuth from "../hooks/useAuth";
 
-const query = `MATCH (user:User {user_id: $user_id})-[:ASSIGNED_TO]->(project:Project)
-RETURN project
+const query = `MATCH (project:Project)
+OPTIONAL MATCH (user:User {user_id: $user_id})-[:ASSIGNED_TO]->(project)
+RETURN project, 
+       CASE WHEN user IS NOT NULL THEN true ELSE false END AS isAssigned
 `;
 
 const ProjectList = () => {
@@ -22,7 +24,9 @@ const ProjectList = () => {
 	if (records) {
 		records.forEach((record) => {
 			const project = record.get("project").properties;
-			data.push(project);
+			const is_assigned = record.get("isAssigned");
+
+			data.push({ ...project, is_assigned });
 		});
 	} else {
 		data = [];
@@ -42,7 +46,7 @@ const ProjectList = () => {
 							<div className="flex flex-wrap items-center">
 								<div className="relative w-full px-4 max-w-full flex-grow flex-1">
 									<h3 className="font-semibold text-base text-blueGray-700">
-										All projects Assigned To You
+										All projects
 									</h3>
 								</div>
 							</div>
@@ -67,6 +71,9 @@ const ProjectList = () => {
 											Description
 										</th>
 										<th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+											Allocated/Free
+										</th>
+										<th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
 											Details
 										</th>
 									</tr>
@@ -75,7 +82,7 @@ const ProjectList = () => {
 								<tbody>
 									{!data.length ? (
 										<tr>
-											<td colSpan={4}>
+											<td colSpan={5}>
 												<center className="text-lg">No Data Found!</center>
 											</td>
 										</tr>
@@ -93,6 +100,14 @@ const ProjectList = () => {
 											</td>
 											<td className="border-t-0 px-6 align-center border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
 												{v.description}
+											</td>
+											<td className="border-t-0 px-6 align-center border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+												<span
+													className={`${
+														v.is_assigned ? "bg-green-500" : "bg-red-500"
+													} text-white active:bg-indigo-600 text-xs font-bold uppercase px-3 py-1 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150`}>
+													{v.is_assigned ? "Allocated" : "Free"}
+												</span>
 											</td>
 											<td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
 												<Link
