@@ -69,3 +69,15 @@ MATCH (another_user:User {user_id: 'U456'})-[:HAS_ROLE]->(user_role)
 MERGE (supervisor)-[:ASSIGNED_PROJECT]->(project)
 MERGE (user)-[:WORKS_ON]->(project)
 MERGE (another_user)-[:WORKS_ON]->(project)
+
+
+-- DELETION---
+
+-- Delete User by ID
+MATCH (user:User {user_id: 'your_user_id'})
+DETACH DELETE user
+
+
+-- Delete Project by ID
+MATCH (project:Project {project_id: 'your_project_id'})
+DETACH DELETE project
