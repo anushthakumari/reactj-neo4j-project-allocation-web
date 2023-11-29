@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useParams } from "react-router-dom";
 import { useReadCypher, useLazyWriteCypher } from "use-neo4j";
 
@@ -26,28 +26,27 @@ MERGE (user)-[:REQUEST_TO]->(project)
 RETURN user, project
 `;
 
-const has_user_requested_query = `MATCH (user:User {user_id: $user_id})-[:REQUEST_TO]->(project:Project {project_id: $project_id})
-RETURN COUNT(user) > 0 AS hasRequested
-`;
-
 const requested_users_query = `
 MATCH (user:User)-[:REQUEST_TO]->(project:Project {project_id: $project_id})
 RETURN user
 `;
 
-const accept_request_query = `MATCH (user:User {user_id: 'your_user_id'})-[request:REQUEST_TO]->(project:Project {project_id: 'your_project_id'})
+const accept_request_query = `MATCH (user:User {user_id: $user_id})-[request:REQUEST_TO]->(project:Project {project_id: $project_id})
 DELETE request
 CREATE (user)-[:ASSIGNED_TO]->(project)
 RETURN user, project
 `;
 
+const reject_request_query = `MATCH (:User {user_id: $user_id})-[request:REQUEST_TO]->(:Project {project_id: $project_id})
+DELETE request
+`;
+
 const ProjectDetails = () => {
 	const { projectid } = useParams();
 
-	const [isRequesting, setisRequesting] = useState(false);
-
 	const user = useAuth();
 
+	//fetch queries
 	const { loading, error, first } = useReadCypher(project_query, {
 		project_id: projectid,
 	});
@@ -56,19 +55,22 @@ const ProjectDetails = () => {
 		project_id: projectid,
 	});
 
-	const is_user_has_requested_q_res = useReadCypher(has_user_requested_query, {
-		project_id: projectid,
-		user_id: user.user_id,
-	});
-
 	const requested_users_res = useReadCypher(requested_users_query, {
 		project_id: projectid,
 	});
 
+	//write and update query
 	const [assign_user, assign_query_state] = useLazyWriteCypher(assign_query);
 	const [request_to_join, request_query_state] = useLazyWriteCypher(
 		request_project_query
 	);
+	const [accept_request, accept_query_state] =
+		useLazyWriteCypher(accept_request_query);
+
+	const [reject_request, reject_query_state] =
+		useLazyWriteCypher(reject_request_query);
+
+	const is_candidate = user.role_id === 1;
 
 	let createdByDetails = {};
 	let projectDetails = {};
@@ -84,19 +86,17 @@ const ProjectDetails = () => {
 		assigned_users = [];
 	}
 
-	if (is_user_has_requested_q_res.first) {
-		is_request_pending = is_user_has_requested_q_res.first.get("hasRequested");
-	}
-
 	if (requested_users_res.records) {
 		pending_users = requested_users_res.records.map(
 			(row) => row.get("user").properties
 		);
 	}
 
+	is_request_pending =
+		pending_users.findIndex((v) => v.user_id === user.user_id) > -1;
+
 	let is_user_assigned =
 		assigned_users.findIndex((v) => v.user_id === user.user_id) > -1;
-	let is_candidate = user.role_id === 1;
 
 	if (first) {
 		projectDetails = first.get("project").properties;
@@ -105,6 +105,7 @@ const ProjectDetails = () => {
 
 	let is_user_is_creator = createdByDetails.user_id === user.user_id;
 
+	//handlers
 	const handleSelect = (user) => {
 		assign_user({ user_id: user.user_id, project_id: projectid })
 			.then(() => {
@@ -116,21 +117,40 @@ const ProjectDetails = () => {
 			});
 	};
 
+	const handleAccept = (user) => {
+		accept_request({ user_id: user.user_id, project_id: projectid })
+			.then(() => {
+				alert("user is assigned to the project!!");
+				fetch_assign_users.run({ project_id: projectid });
+				requested_users_res.run({ project_id: projectid });
+			})
+			.catch(() => {
+				alert("Failed to assign a user to the project!");
+			});
+	};
+
+	const handleReject = (user) => {
+		reject_request({ user_id: user.user_id, project_id: projectid })
+			.then(() => {
+				alert("Request is rejected!!");
+				fetch_assign_users.run({ project_id: projectid });
+				requested_users_res.run({ project_id: projectid });
+			})
+			.catch(() => {
+				alert("Failed to reject!");
+			});
+	};
+
 	const handleRequest = () => {
-		setisRequesting(true);
 		request_to_join({ user_id: user.user_id, project_id: projectid })
 			.then(() => {
 				alert("Request has been sent!");
-				is_user_has_requested_q_res.run({
+				requested_users_res.run({
 					project_id: projectid,
-					user_id: user.user_id,
 				});
 			})
 			.catch(() => {
 				alert("Requesting has been failed!");
-			})
-			.finally((e) => {
-				setisRequesting(false);
 			});
 	};
 
@@ -202,12 +222,14 @@ const ProjectDetails = () => {
 						{!is_user_assigned && is_candidate ? (
 							<button
 								onClick={handleRequest}
-								class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-								disabled={is_request_pending || isRequesting}>
-								{isRequesting
+								className={`bg-${
+									is_request_pending ? "red" : "blue"
+								}-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded`}
+								disabled={is_request_pending || request_query_state.loading}>
+								{request_query_state.loading
 									? "Loading..."
 									: is_request_pending
-									? "Pending"
+									? "Request Is Pending"
 									: "Request to join"}
 							</button>
 						) : null}
@@ -216,20 +238,42 @@ const ProjectDetails = () => {
 					{is_user_is_creator ? (
 						<div class="bg-white p-8 rounded shadow flex flex-col gap-2">
 							<h2 class="text-2xl font-bold mb-4">Pending Requets</h2>
-							{pending_users.map((v) => (
-								<li key={v.user_id} class="flex items-center space-x-4">
-									<img
-										src="https://via.placeholder.com/50"
-										alt="User Avatar"
-										class="w-10 h-10 rounded-full"
-									/>
-									<div>
-										<h3 class="text-md font-semibold capitalize">
-											{v.full_name}
-										</h3>
-									</div>
-								</li>
-							))}
+							<ul className="flex flex-col gap-3">
+								{requested_users_res.loading ? <li>Loading...</li> : ""}
+								{!pending_users.length ? <li>No Pending Requets.</li> : ""}
+								{pending_users.map((v) => (
+									<li
+										key={v.user_id}
+										className="flex justify-between space-x-4">
+										<div className="flex items-center space-x-4">
+											<img
+												src="https://via.placeholder.com/50"
+												alt="User Avatar"
+												class="w-10 h-10 rounded-full"
+											/>
+											<div>
+												<h3 class="text-md font-semibold capitalize">
+													{v.full_name}
+												</h3>
+											</div>
+										</div>
+										<div className="flex items-center gap-2">
+											<button
+												onClick={() => handleAccept(v)}
+												className="bg-green-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+												disabled={accept_query_state.loading}>
+												{accept_query_state.loading ? "Loading..." : "Accept"}
+											</button>
+											<button
+												onClick={() => handleReject(v)}
+												className="bg-red-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+												disabled={reject_query_state.loading}>
+												{reject_query_state.loading ? "Loading..." : "Reject"}
+											</button>
+										</div>
+									</li>
+								))}
+							</ul>
 						</div>
 					) : null}
 				</div>
